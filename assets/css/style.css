@@ -238,3 +238,46 @@ footer {
   font-size: 1.5rem;
   color: var(--accent);
 }
+
+
+/* --- Writing list: responsive layout --- */
+.entry{
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+/* date column */
+.entry .date{
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* text column */
+.entry .entry-text{
+  flex: 1 1 auto;
+  min-width: 0; /* prevents overflow issues in flex */
+}
+
+/* nicer mobile layout */
+@media (max-width: 600px){
+  .entry{
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .entry .date{
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+
+  .entry a.article{
+    font-size: 1.15rem;   /* smaller on phone */
+    line-height: 1.25;
+  }
+
+  .entry .meta{
+    font-size: 0.95rem;
+    line-height: 1.25;
+  }
+}
