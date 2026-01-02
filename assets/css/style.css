@@ -1,0 +1,240 @@
+/* ---- GLOBAL STYLE ---- */
+
+:root {
+  --bg: #ffffff;
+  --text: #111111;
+  --accent: #26541a;
+  --article: #a93737;
+  --date: #3f1414;
+  --menu-bg: #e7c29f;
+  --max-width: 2000px;
+  --font-serif: "Times New Roman", serif;
+}
+
+body {
+  margin: 0;
+  font-size: 1.3rem;
+  font-family: var(--font-serif);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.4;
+}
+
+/* Container just constrains width if needed later */
+.container {
+  max-width: var(--max-width);
+  padding: 0;
+}
+
+/* ---- SKIP LINK (ACCESSIBILITY) ---- */
+
+.skip-link {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateY(-200%);
+  background: var(--bg);
+  color: var(--text);
+  padding: 0.5rem 1rem;
+  z-index: 1000;
+  text-decoration: none;
+  border: 2px solid var(--accent);
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  clip: auto;
+}
+
+
+/* ---- FOCUS STYLES (ACCESSIBILITY) ---- */
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---- HEADER ---- */
+
+header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  font-size: 4rem;
+  margin: 0.2rem 0 0;
+  padding-left: 1rem;
+}
+
+/* Hide the desktop nav completely; side-menu is main nav */
+.top-nav {
+  display: none !important;
+}
+
+/* ---- HAMBURGER TOGGLE ---- */
+
+.menu-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1.5rem;
+  font-size: 3rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  z-index: 200;
+}
+
+/* ---- RIGHT SIDE MENU ---- */
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: -500px; /* completely off-screen */
+  width: 320px;
+  height: 100vh;
+  background: var(--menu-bg);
+  padding-top: 6rem;
+  padding-left: 2.5rem;
+  padding-right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+  transition: right 0.35s ease-in-out;
+  z-index: 150;
+}
+
+.side-menu.open {
+  right: 0;
+}
+
+.side-menu a {
+  font-size: 2.4rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.side-menu a:hover,
+.side-menu a.active {
+  text-decoration: underline;
+}
+
+/* ---- MAIN CONTENT ---- */
+
+main {
+  padding: 0 1rem;
+}
+
+/* ---- SECTION IMAGES ---- */
+
+section img {
+  width: 100%;
+  border-radius: 4px;
+  margin: 1.2rem 0;
+}
+
+/* ---- ARTICLE LIST (WRITING PAGE) ---- */
+
+.entry {
+  display: flex;
+  gap: 2rem;
+  align-items: baseline;
+  margin-top: 1rem;
+}
+
+.date {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--date);
+  white-space: nowrap;
+}
+
+.entry-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.article {
+  font-size: 2.8rem;
+  color: var(--article);
+  text-decoration: none;
+}
+
+.article:hover {
+  text-decoration: underline;
+}
+
+/* Article metadata under titles */
+
+.meta {
+  font-size: 1.6rem;
+  margin-top: 0.4rem;
+  color: var(--accent);
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.meta a {
+  color: #a06d3f; /* beige/orange tone */
+  text-decoration: underline;
+  font-weight: 500;
+  text-shadow: 0.15px 0 currentColor; /* “medium bold” */
+}
+
+.meta a:hover {
+  opacity: 0.6;
+}
+
+/* ---- ARTICLE IMAGES (INSIDE ARTICLES) ---- */
+
+.article-images {
+  margin: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.article-images figure {
+  margin: 0;
+}
+
+.article-images img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 2px;
+}
+
+.article-images figcaption {
+  font-size: 1.2rem;
+  color: #555;
+  margin-top: 0.25rem;
+}
+
+/* Full-width “hero” style image option */
+.full-width-image img {
+  width: 100%;
+}
+
+/* Smaller “supporting” image option for inline content */
+.supporting-image img {
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Footer */
+
+footer {
+  margin-top: 5rem;
+  margin-left: 0;
+  font-size: 1.5rem;
+  color: var(--accent);
+}
