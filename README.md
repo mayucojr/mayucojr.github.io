@@ -15,7 +15,7 @@ python3 scripts/build.py
 ```
 8. If you would like, you can check your edits by hosting the website locally, by running:
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 8000 --bind 127.0.0.1
 ```
 9. Now, we can publish the changes to the website by pushing to GitHub, using the following commands (one at a time):
 ```bash
@@ -38,7 +38,7 @@ python3 scripts/build.py
 ```
 8. If you would like, you can check your edits by hosting the website locally, by running:
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 8000 --bind 127.0.0.1
 ```
 9. Now, we can publish the changes to the website by pushing to GitHub, using the following commands (one at a time):
 ```bash
@@ -60,4 +60,3 @@ Here is the project structure:
 - `assets/css/style.css`: defining code for the look and style of the website
 - `assets/js/menu.js`: defines the menu action for the sidebar
 - `scripts/build.py`: generates the html files from md files and updates writing.html and curation.html
-
