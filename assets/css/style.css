@@ -282,3 +282,312 @@ footer {
     line-height: 1.25;
   }
 }
+
+/* ---------------------------------------
+   CURATION LIST LAYOUT
+--------------------------------------- */
+
+.curation-entry{
+  display: flex;
+  align-items: flex-start;
+  gap: 2.5rem;
+  margin-top: 1.2rem;
+}
+
+/* left date column */
+.curation-dates{
+  flex: 0 0 auto;
+  min-width: 170px;
+  color: var(--date);
+}
+
+.curation-date-top,
+.curation-date-bottom{
+  font-size: 2rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.curation-arrow{
+  font-size: 2.2rem;
+  line-height: 1;
+  margin: 0.4rem 0 0.6rem;
+}
+
+/* right content column */
+.curation-main{
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* image row (3-up) */
+.curation-images{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 0.2rem;
+  margin-bottom: 0.6rem;
+}
+
+/* IMPORTANT: override global section img { width:100% } behavior */
+.curation-images img{
+  width: 100%;
+  height: 180px;          /* adjust to taste */
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  margin: 0;              /* override section img margin */
+}
+
+/* placeholders (if image paths missing) */
+.curation-img.placeholder{
+  width: 100%;
+  height: 180px;
+  background: #efefef;
+  border: 1px solid #777;
+}
+
+/* title link */
+.curation-title{
+  font-size: 2.8rem;
+  color: var(--article);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.curation-title:hover{
+  text-decoration: underline;
+}
+
+/* meta links reuse your existing .meta styling */
+.curation-text .meta{
+  margin-top: 0.4rem;
+}
+
+/* ---------------------------------------
+   CURATION DETAIL PAGE HEADER (optional, but matches script output)
+--------------------------------------- */
+
+.curation-detail{
+  margin: 1rem 0 1.5rem;
+}
+
+.curation-detail-dates{
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--date);
+  margin-bottom: 0.75rem;
+}
+
+.curation-detail-images{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.curation-detail-images img{
+  width: 100%;
+  height: 220px;          /* slightly bigger on detail page */
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  margin: 0;
+}
+
+/* ---------------------------------------
+   Mobile
+--------------------------------------- */
+@media (max-width: 800px){
+  .curation-entry{
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .curation-dates{
+    min-width: 0;
+  }
+
+  .curation-date-top,
+  .curation-date-bottom{
+    font-size: 1.1rem;
+  }
+
+  .curation-arrow{
+    font-size: 1.2rem;
+    margin: 0.2rem 0 0.3rem;
+  }
+
+  .curation-images,
+  .curation-detail-images{
+    grid-template-columns: 1fr;
+  }
+
+  .curation-images img,
+  .curation-img.placeholder{
+    height: 170px;
+  }
+
+  .curation-detail-images img{
+    height: 200px;
+  }
+
+  .curation-title{
+    font-size: 1.4rem;
+    line-height: 1.25;
+    text-decoration: underline; /* match your mobile writing style */
+  }
+}
+/* ---------------------------------------
+   CURATION LIST LAYOUT (square thumbnails + dash)
+--------------------------------------- */
+
+.curation-entry{
+  display: flex;
+  align-items: flex-start;
+  gap: 2.5rem;
+  margin-top: 1.2rem;
+}
+
+/* left date column */
+.curation-dates{
+  flex: 0 0 auto;
+  min-width: 170px;
+  color: var(--date);
+}
+
+.curation-date-top,
+.curation-date-bottom{
+  font-size: 2rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* centered dash between dates */
+.curation-sep{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;          /* matches date text block height feel */
+  font-size: 2.2rem;
+  line-height: 1;
+  margin: 0.25rem 0 0.35rem;
+}
+
+/* right content column */
+.curation-main{
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* image row (3-up) */
+.curation-images{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 0.2rem;
+  margin-bottom: 0.6rem;
+}
+
+/* IMPORTANT: override global section img { width:100%; margin:... } */
+.curation-images img{
+  width: 100%;
+  aspect-ratio: 1 / 1;   /* SQUARE */
+  height: auto;          /* lets aspect-ratio control it */
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  margin: 0;
+}
+
+/* placeholder squares */
+.curation-img.placeholder{
+  width: 100%;
+  aspect-ratio: 1 / 1;   /* SQUARE */
+  background: #efefef;
+  border: 1px solid #ccc;
+}
+
+/* title link */
+.curation-title{
+  font-size: 2.8rem;
+  color: var(--article);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.curation-title:hover{
+  text-decoration: underline;
+}
+
+/* meta links reuse your existing .meta styling */
+.curation-text .meta{
+  margin-top: 0.4rem;
+}
+
+/* ---------------------------------------
+   CURATION DETAIL PAGE HEADER (optional, but matches script output)
+   Also square thumbnails.
+--------------------------------------- */
+
+.curation-detail{
+  margin: 1rem 0 1.5rem;
+}
+
+.curation-detail-dates{
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--date);
+  margin-bottom: 0.75rem;
+}
+
+.curation-detail-images{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.curation-detail-images img{
+  width: 100%;
+  aspect-ratio: 1 / 1;   /* SQUARE */
+  height: auto;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  margin: 0;
+}
+
+/* ---------------------------------------
+   Mobile
+--------------------------------------- */
+@media (max-width: 800px){
+  .curation-entry{
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .curation-dates{
+    min-width: 0;
+  }
+
+  .curation-date-top,
+  .curation-date-bottom{
+    font-size: 1.1rem;
+  }
+
+  .curation-sep{
+    font-size: 1.2rem;
+    height: 1.2rem;
+    margin: 0.15rem 0 0.2rem;
+  }
+
+  .curation-images,
+  .curation-detail-images{
+    grid-template-columns: 1fr;
+  }
+
+  .curation-title{
+    font-size: 1.4rem;
+    line-height: 1.25;
+    text-decoration: underline;
+  }
+}
