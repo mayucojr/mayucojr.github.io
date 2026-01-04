@@ -126,7 +126,7 @@ def main():
     entry_blocks = [build_entry(e) for e in entries]
     update_writing(entry_blocks)
 
-    print("✔ Build complete!")
+    print("Build complete.")
 
 
 if __name__ == "__main__":
