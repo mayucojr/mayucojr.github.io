@@ -49,7 +49,7 @@ git push origin master
 
 ### Project Structure
 
-Here is the project structure
+Here is the project structure:
 - `curation.html`: a page for your curation entries
 - `index.html`: the homepage of your website
 - `writing.html`: a page to list all of the writing you've done
