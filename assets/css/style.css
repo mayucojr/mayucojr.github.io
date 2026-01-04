@@ -274,6 +274,7 @@ footer {
   .entry a.article{
     font-size: 1.15rem;   /* smaller on phone */
     line-height: 1.25;
+    text-decoration: underline;
   }
 
   .entry .meta{
