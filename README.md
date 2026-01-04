@@ -17,10 +17,10 @@ python3 scripts/build.py
 ```bash
 python3 -m http.server 8000
 ```
-9. Now, we can publish the changes to the website by pushing to GitHub, using the following command:
+9. Now, we can publish the changes to the website by pushing to GitHub, using the following commands (one at a time):
 ```bash
-git add . \\
-git commit -m 'adding new article' \\
+git add .
+git commit -m 'adding new article'
 git push origin master
 ```
 
@@ -40,10 +40,10 @@ python3 scripts/build.py
 ```bash
 python3 -m http.server 8000
 ```
-9. Now, we can publish the changes to the website by pushing to GitHub, using the following command:
+9. Now, we can publish the changes to the website by pushing to GitHub, using the following commands (one at a time):
 ```bash
-git add . \\
-git commit -m 'adding new curation entry' \\
+git add .
+git commit -m 'adding new curation entry' 
 git push origin master
 ```
 
