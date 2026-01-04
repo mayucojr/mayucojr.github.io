@@ -1,5 +1,6 @@
 import markdown
 import yaml
+import re
 from datetime import datetime, date as date_type
 from pathlib import Path
 
@@ -32,6 +33,31 @@ CURATION_LINK_PREFIX = "assets/curation/html"
 # -------------------------------------------------------
 # Helpers
 # -------------------------------------------------------
+def add_image_captions(html: str) -> str:
+    """
+    Wrap markdown-generated <p><img ...></p> blocks in <figure> with a <figcaption>
+    using the <img> alt text as the caption.
+
+    Notes:
+    - Only targets images that appear alone inside a <p>...</p> block.
+    - Leaves inline images (images mixed with text) alone.
+    """
+    img_re = re.compile(
+        r'<p>\s*(<img[^>]*alt="([^"]+)"[^>]*>)\s*</p>',
+        flags=re.IGNORECASE
+    )
+
+    def repl(m):
+        img_tag = m.group(1)
+        caption = m.group(2).strip()
+        # If you ever want to allow "no caption", set alt="" in markdown
+        if not caption:
+            return f'<figure class="md-figure">{img_tag}</figure>'
+        return f'<figure class="md-figure">{img_tag}<figcaption>{caption}</figcaption></figure>'
+
+    return img_re.sub(repl, html)
+
+
 def parse_front_matter(md_text: str):
     """Extract YAML front matter and return dict + markdown body."""
     if md_text.startswith("---"):
@@ -124,7 +150,7 @@ def build_writing_html_from_md(md_path: Path):
     date_str = format_date(dt)
     tags = meta.get("tags", [])
 
-    html_content = MARKDOWN_EXT.convert(body)
+    html_content = add_image_captions(MARKDOWN_EXT.convert(body))
 
     with open(ARTICLE_TEMPLATE_FILE, "r", encoding="utf-8") as temp:
         template = temp.read()
@@ -226,7 +252,8 @@ def build_curation_html_from_md(md_path: Path):
 </div>
 """.strip()
 
-    html_content = images_html + "\n" + MARKDOWN_EXT.convert(body)
+    html_content = images_html + "\n" + add_image_captions(MARKDOWN_EXT.convert(body))
+
 
     with open(ARTICLE_TEMPLATE_FILE, "r", encoding="utf-8") as temp:
         template = temp.read()
