@@ -1,40 +1,63 @@
 # Mario's Personal Website
 
 
-### Getting Started
+### Adding an article
 
-Open a terminal on your Mac by INSERT_PROCEDURE. Navigate to a desired folder/directory where you like to work from. This video can help for understanding how to do this. ON my machine for exmaple, starting from my home folder/directory:
-
+1. Open VSCode and open the folder called `mayucojr.github.io`
+2. Create a new markdown file at `assets/articles/markdown` named `DayMonthYear.md`
+3. Create a new folder at `assets/images` named `article_DayMonthYear`
+4. Add relevant media in this new image folder
+5. Copy and paste the format from previous articles into `DayMonthYear.md`
+6. Write into the `.md` file
+7. Once done, run the following command in the VSCode terminal (this builds the page from the `.md` file):
 ```bash
-gabe@gabe-XPS-13-9300:~$ ls
-balenaEtcher  Downloads         Pictures          Templates
-cmu           legion_essential  Public            Videos
-Desktop       matlab_projects   snap              websites
-Documents     Music             ssh_commands.txt  workspaces
-gabe@gabe-XPS-13-9300:~$ cd websites/
+python3 scripts/build.py
+```
+8. If you would like, you can check your edits by hosting the website locally, by running:
+```bash
+python3 -m http.server 8000
+```
+9. Now, we can publish the changes to the website by pushing to GitHub, using the following command:
+```bash
+git add . \\
+git commit -m 'adding new article' \\
+git push origin master
 ```
 
-Then, clone (copy the source code) into your decided porjected folder by copying and pasting the follow command into the command line.
+### Adding a curation entry
 
+1. Open VSCode and open the folder called `mayucojr.github.io`
+2. Create a new markdown file at `assets/curation/markdown` named `DayMonthYear.md`
+3. Create a new folder at `assets/images` named `curation_DayMonthYear`
+4. Add relevant media in this new image folder
+5. Copy and paste the format from previous curation entries into `DayMonthYear.md`
+6. Write into the `.md` file
+7. Once done, run the following command in the VSCode terminal (this builds the page from the `.md` file):
 ```bash
-git clone INSERT_LINK
+python3 scripts/build.py
 ```
-
-You must now download VSCode to be able to edit the source code. Once you can downlaoded VSCode, you should be able to open the source code using the following command in the command line. 
-
+8. If you would like, you can check your edits by hosting the website locally, by running:
 ```bash
-code curator-website
+python3 -m http.server 8000
+```
+9. Now, we can publish the changes to the website by pushing to GitHub, using the following command:
+```bash
+git add . \\
+git commit -m 'adding new curation entry' \\
+git push origin master
 ```
 
 ### Project Structure
 
 Here is the project structure
-- `index.html`: the homepage of your website. Should remain the same (minimal editing)
-- `curation.html`: a page for your events and stuff. Should be regularly updated
+- `curation.html`: a page for your curation entries
+- `index.html`: the homepage of your website
 - `writing.html`: a page to list all of the writing you've done
-- `assets/style.css`: defining code for the look and style of the website
+- `contact.html`: a page so people know how to contact you
 - `articles`: a folder for individual articles that you can add as you go
+- `curation`: a folder for curation entries that you can add as you go
 - `images`: a folder for images you want for your website (every page can find them)
+- `assets/css/style.css`: defining code for the look and style of the website
+- `assets/js/menu.js`: defines the menu action for the sidebar
+- `scripts/build.py`: generates the html files from md files and updates writing.html and curation.html
 
-
-`python3 -m http.server 8000`
