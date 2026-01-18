@@ -41,9 +41,15 @@ python3 scripts/build.py
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 9. Now, we can publish the changes to the website by pushing to GitHub, using the following commands (one at a time):
+
+First, make sure your terminal is in the mayucojr.github.io folder, then run
 ```bash
 git add .
-git commit -m 'adding new curation entry' 
+```
+```bash
+git commit -m 'adding new curation entry'
+```
+```bash
 git push origin master
 ```
 
