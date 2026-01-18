@@ -349,7 +349,7 @@ footer {
 
 /* title link */
 .curation-title{
-  font-size: 2.8rem;
+  font-size: 1.25rem;
   color: var(--article);
   text-decoration: none;
   display: inline-block;
@@ -409,7 +409,7 @@ footer {
 
   .curation-date-top,
   .curation-date-bottom{
-    font-size: 1.1rem;
+    font-size: 1.5rem;
   }
 
   .curation-arrow{
@@ -432,10 +432,21 @@ footer {
   }
 
   .curation-title{
-    font-size: 1.4rem;
+    font-size: 1.25rem;
     line-height: 1.25;
     text-decoration: underline; /* match your mobile writing style */
   }
+
+  .curation-text .meta{
+    font-size: 0.95rem;   /* match writing tags size */
+    line-height: 1.25;
+    gap: 0.8rem;
+  }
+
+  .curation-text .meta a{
+    font-size: inherit;   /* ensure links follow meta size */
+  }
+
 }
 /* ---------------------------------------
    CURATION LIST LAYOUT (square thumbnails + dash)
@@ -590,4 +601,22 @@ footer {
     line-height: 1.25;
     text-decoration: underline;
   }
+}
+
+
+.md-figure{
+  margin: 1.2rem 0;
+}
+
+.md-figure img{
+  display: block;
+  width: 100%;
+  margin: 0; /* override section img margin behavior */
+}
+
+.md-figure figcaption{
+  margin-top: 0.4rem;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: #444;
 }
