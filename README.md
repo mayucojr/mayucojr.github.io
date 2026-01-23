@@ -1,6 +1,6 @@
 # Mario's Personal Website
 
-
+cd m tab before you do anything 
 ### Adding an article
 
 1. Open VSCode and open the folder called `mayucojr.github.io`
