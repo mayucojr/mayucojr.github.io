@@ -620,3 +620,13 @@ footer {
   line-height: 1.35;
   color: #444;
 }
+
+.contact-link {
+  color: blue;
+  text-decoration: none;
+}
+
+.contact-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
