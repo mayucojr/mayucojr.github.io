@@ -630,3 +630,51 @@ footer {
   opacity: 0.8;
   text-decoration: underline;
 }
+
+/* -------------------------------------------------------
+   SELF-HOSTED VIDEO EMBEDS  (.md-video)
+   Usage in markdown (same syntax as images):
+     ![Caption](assets/videos/clip.mp4)
+   video.js adds .portrait or .landscape at runtime.
+------------------------------------------------------- */
+
+.md-video {
+  margin: 1.5rem auto;   /* auto left/right centers the figure */
+  max-width: 550px;      /* cap the width here, not on the video */
+}
+
+.md-video video {
+  display: block;
+  width: 100%;           /* fills the figure, which is already capped */
+  border-radius: 4px;
+}
+
+.md-video figcaption {
+  margin-top: 0.4rem;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: #444;
+  text-align: left;    /* center the caption text */
+}
+
+/* Portrait / vertical (e.g. 9:16 clips) */
+.md-video.portrait {
+  max-width: 360px;      /* narrower cap for vertical */
+}
+
+.md-video.portrait video {
+  aspect-ratio: 9 / 16;
+  object-fit: cover;
+}
+
+/* Landscape / horizontal (e.g. 16:9 clips) */
+.md-video.landscape video {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+@media (max-width: 600px) {
+  .md-video.portrait {
+    max-width: 100%;
+  }
+}

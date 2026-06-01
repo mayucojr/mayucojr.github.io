@@ -6,6 +6,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+VIDEO_EXTENSIONS = {".mp4", ".webm", ".mov", ".m4v", ".ogg"}
+
 # -----------------------------
 # Templates (writing)
 # -----------------------------
@@ -56,6 +58,42 @@ def add_image_captions(html: str) -> str:
         return f'<figure class="md-figure">{img_tag}<figcaption>{caption}</figcaption></figure>'
 
     return img_re.sub(repl, html)
+
+
+def process_video_embeds(html: str) -> str:
+    """
+    Convert standalone <p><img src="file.mp4" alt="caption"></p> blocks into
+    <figure class="md-video"><video ...></video><figcaption>...</figcaption></figure>.
+
+    Orientation class (portrait / landscape) is applied at runtime by video.js.
+
+    Usage in markdown — same syntax as images, just point at a video file:
+        ![Optional caption](assets/videos/clip.mp4)
+    """
+    img_p_re = re.compile(r"<p>\s*(<img\b[^>]*>)\s*</p>", re.IGNORECASE)
+    src_re   = re.compile(r'\bsrc="([^"]+)"', re.IGNORECASE)
+    alt_re   = re.compile(r'\balt="([^"]*)"', re.IGNORECASE)
+
+    def repl(m):
+        img_tag   = m.group(1)
+        src_match = src_re.search(img_tag)
+        if not src_match:
+            return m.group(0)
+        src = src_match.group(1).strip()
+        if Path(src).suffix.lower() not in VIDEO_EXTENSIONS:
+            return m.group(0)   # regular image — leave for add_image_captions
+        alt_match = alt_re.search(img_tag)
+        caption   = alt_match.group(1).strip() if alt_match else ""
+        cap_html  = f"\n  <figcaption>{caption}</figcaption>" if caption else ""
+        return (
+            f'<figure class="md-video">\n'
+            f'  <video src="{src}" autoplay muted loop playsinline preload="metadata" controls>\n'
+            f'    Your browser does not support the video tag.\n'
+            f'  </video>{cap_html}\n'
+            f'</figure>'
+        )
+
+    return img_p_re.sub(repl, html)
 
 
 def parse_front_matter(md_text: str):
@@ -150,7 +188,7 @@ def build_writing_html_from_md(md_path: Path):
     date_str = format_date(dt)
     tags = meta.get("tags", [])
 
-    html_content = add_image_captions(MARKDOWN_EXT.convert(body))
+    html_content = add_image_captions(process_video_embeds(MARKDOWN_EXT.convert(body)))
 
     with open(ARTICLE_TEMPLATE_FILE, "r", encoding="utf-8") as temp:
         template = temp.read()
@@ -252,7 +290,7 @@ def build_curation_html_from_md(md_path: Path):
 </div>
 """.strip()
 
-    html_content = images_html + "\n" + add_image_captions(MARKDOWN_EXT.convert(body))
+    html_content = images_html + "\n" + add_image_captions(process_video_embeds(MARKDOWN_EXT.convert(body)))
 
 
     with open(ARTICLE_TEMPLATE_FILE, "r", encoding="utf-8") as temp:
