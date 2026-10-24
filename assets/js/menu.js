@@ -34,3 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+// Footer: edit the text here once and every page updates (year stays current)
+document.addEventListener("DOMContentLoaded", () => {
+  const footer = document.querySelector("footer");
+  if (footer) footer.textContent = `© Mario Rodriguez, ${new Date().getFullYear()}.`;
+});

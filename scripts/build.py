@@ -383,6 +383,12 @@ def build_curation():
 # Main
 # -------------------------------------------------------
 def main():
+    # Shrink/convert any new photos first (and fix their links) so pages load fast
+    try:
+        import optimize_images
+        optimize_images.main()
+    except ImportError:
+        print("Skipping image optimizer (scripts/optimize_images.py not found).")
     build_writing()
     build_curation()
     print("Build complete.")

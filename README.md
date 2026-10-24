@@ -1,6 +1,18 @@
 # Mario's Personal Website
 
 cd m tab before you do anything 
+### Photos (automatic)
+
+Drop photos into the image folder in any format (iPhone `.heic` is fine). When you run `python3 scripts/build.py`, it automatically converts and shrinks them so the site loads fast, and fixes the links for you. If the file name changes (for example `photo.heic` becomes `photo.jpg`), use the new name in your `.md` file, or just let the script update it.
+
+One-time setup on a new computer (from the `mayucojr.github.io` folder):
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+Each time you open a new terminal to work on the site, run `source .venv/bin/activate` first (you'll see `(.venv)` appear), then use the commands below as usual.
+
 ### Adding an article
 
 1. Open VSCode and open the folder called `mayucojr.github.io`
