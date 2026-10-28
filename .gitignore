@@ -1,0 +1,10 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+_site/
+
+# Built from the markdown files by scripts/build.py (GitHub Actions rebuilds
+# these on every publish, so they are not stored in git).
+assets/articles/html/
+assets/curation/html/

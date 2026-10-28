@@ -1,8 +1,24 @@
-import markdown
-import yaml
+"""
+Builds the website pages from the markdown files.
+
+    python3 scripts/build.py
+
+On the live site this runs automatically (GitHub Actions) every time something
+is saved in the Pages CMS, so you normally never run it by hand.
+
+If one entry has a problem, it is skipped with a plain-English warning and the
+rest of the site still builds.
+"""
+import html as html_lib
+import os
 import re
+import sys
 from datetime import datetime, date as date_type
 from pathlib import Path
+from urllib.parse import quote
+
+import markdown
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -33,8 +49,33 @@ CURATION_LINK_PREFIX = "assets/curation/html"
 
 
 # -------------------------------------------------------
+# Problems with a single entry
+# -------------------------------------------------------
+class EntryError(Exception):
+    """Something is wrong with one entry. The message is written for a non-programmer."""
+
+
+SKIPPED = []  # (file, message) for every entry that could not be built
+
+
+def warn(md_path: Path, message: str):
+    """Report a skipped entry. On GitHub this shows up as a yellow warning on the run."""
+    rel = md_path.relative_to(ROOT).as_posix()
+    SKIPPED.append((rel, message))
+    if os.environ.get("GITHUB_ACTIONS"):
+        print(f"::warning file={rel}::Skipped. {message}")
+    else:
+        print(f"WARNING: {rel} was skipped. {message}")
+
+
+# -------------------------------------------------------
 # Helpers
 # -------------------------------------------------------
+def esc(text) -> str:
+    """Make text safe to put inside HTML (so a title with & or < can't break the page)."""
+    return html_lib.escape(str(text), quote=False)
+
+
 def add_image_captions(html: str) -> str:
     """
     Wrap markdown-generated <p><img ...></p> blocks in <figure> with a <figcaption>
@@ -96,30 +137,93 @@ def process_video_embeds(html: str) -> str:
     return img_p_re.sub(repl, html)
 
 
+FRONT_MATTER_RE = re.compile(
+    r"\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|\Z)(.*)\Z", re.DOTALL
+)
+
+
 def parse_front_matter(md_text: str):
-    """Extract YAML front matter and return dict + markdown body."""
-    if md_text.startswith("---"):
-        _, front, body = md_text.split("---", 2)
-        meta = yaml.safe_load(front.strip()) or {}
-        return meta, body.strip()
-    raise ValueError("Markdown file missing YAML front matter section")
+    """Extract YAML front matter (the details between the two --- lines) and the body."""
+    match = FRONT_MATTER_RE.match(md_text.lstrip("﻿"))
+    if not match:
+        raise EntryError(
+            "The file must begin with a line of three dashes (---), then the details "
+            "(title, date...), then another line of three dashes."
+        )
+    try:
+        meta = yaml.safe_load(match.group(1)) or {}
+    except yaml.YAMLError:
+        raise EntryError(
+            "The details at the top of the file could not be read. A common cause is a "
+            "title containing a colon (:) or a quote mark that is not wrapped in quotes."
+        )
+    if not isinstance(meta, dict):
+        raise EntryError("The details at the top of the file are not in the expected format.")
+    return meta, match.group(2).strip()
 
 
-def coerce_date(date_input):
-    """Convert YAML date/date-like into a datetime for sorting."""
+def coerce_date(date_input, field="date"):
+    """
+    Convert a date from the front matter into a datetime for sorting.
+    Returns None when the date is blank. Accepts 2026-09-05, 2026-09-05T10:30, or a YAML date.
+    """
     if date_input is None:
         return None
+    if isinstance(date_input, str) and not date_input.strip():
+        return None
     if isinstance(date_input, datetime):
-        return date_input
+        return date_input.replace(tzinfo=None)
     if isinstance(date_input, date_type):
         return datetime.combine(date_input, datetime.min.time())
-    # expected string "YYYY-MM-DD"
-    return datetime.strptime(str(date_input), "%Y-%m-%d")
+    try:
+        return datetime.strptime(str(date_input).strip()[:10], "%Y-%m-%d")
+    except ValueError:
+        raise EntryError(
+            f'The {field} is "{date_input}", but it must look like 2026-09-05 (year-month-day).'
+        )
+
+
+def required_date(meta: dict, field: str):
+    dt = coerce_date(meta.get(field), field)
+    if dt is None:
+        raise EntryError(f"The {field} is empty. Every entry needs a {field}.")
+    return dt
 
 
 def format_date(dt: datetime):
     """Format datetime into '13 Nov. 2025'."""
     return dt.strftime("%d %b. %Y")
+
+
+def asset_url(path) -> str:
+    """
+    Turn an image path from an entry into one that works from any page.
+    '../assets/images/x.jpg', 'assets/images/x.jpg' and '/assets/images/x.jpg' all
+    become '/assets/images/x.jpg'. Full web addresses are left alone.
+    """
+    p = str(path or "").strip()
+    if not p:
+        return ""
+    if re.match(r"^[a-z][a-z0-9+.-]*:", p, re.IGNORECASE) or p.startswith("//"):
+        return p
+    while p.startswith("./") or p.startswith("../"):
+        p = p[2:] if p.startswith("./") else p[3:]
+    if not p.startswith("/"):
+        p = "/" + p
+    return quote(p, safe="/%:@!$&'()*+,;=-._~")
+
+
+def get_title(meta: dict, md_path: Path) -> str:
+    return esc(str(meta.get("title") or md_path.stem).strip())
+
+
+def get_tags(meta: dict):
+    tags = meta.get("tags")
+    if tags is None:
+        return []
+    if isinstance(tags, (str, dict)):
+        return [tags]
+    return list(tags)
 
 
 def update_index(index_file: Path, entry_blocks):
@@ -148,18 +252,17 @@ def update_index(index_file: Path, entry_blocks):
 
 def render_tag_links(tags):
     """Render tags as link list. Supports string tags or {text, href} dict tags."""
-    if not tags:
-        return ""
     out = []
-    for tag in tags:
+    for tag in tags or []:
         if isinstance(tag, dict):
-            text = tag.get("text", "").strip()
-            href = tag.get("href", "#")
+            text = str(tag.get("text") or "").strip()
+            href = str(tag.get("href") or "").strip() or "#"
             if text:
-                out.append(f'<a href="{href}" target="_blank">{text}</a>')
+                out.append(f'<a href="{html_lib.escape(href)}" target="_blank">{esc(text)}</a>')
         else:
-            # string tag fallback
-            out.append(f'<a href="#">{tag}</a>')
+            text = str(tag or "").strip()
+            if text:
+                out.append(f'<a href="#">{esc(text)}</a>')
     return "\n".join(out) + ("\n" if out else "")
 
 
@@ -171,24 +274,45 @@ def safe_img(src: str):
     return '<div class="curation-img placeholder"></div>'
 
 
+def read_entry(md_path: Path):
+    try:
+        text = md_path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        raise EntryError("The file is not saved as plain text (UTF-8).")
+    return parse_front_matter(text)
+
+
+def build_all(md_dir: Path, builder):
+    """Run `builder` on every .md file. A broken entry is skipped, not fatal."""
+    entries = []
+    md_files = sorted(md_dir.glob("*.md"))
+    for md_file in md_files:
+        try:
+            entries.append(builder(md_file))
+        except EntryError as e:
+            warn(md_file, str(e))
+        except Exception as e:  # never let one entry take down the whole site
+            warn(md_file, f"Unexpected problem ({type(e).__name__}: {e}).")
+    if md_files and not entries:
+        # Every entry failed: that's a bug in the build, not a typo. Don't publish an empty list.
+        raise SystemExit(f"Build stopped: none of the {len(md_files)} files in {md_dir} could be built.")
+    return entries
+
+
 # -------------------------------------------------------
 # Writing pipeline (kept consistent with your previous setup)
 # -------------------------------------------------------
 def build_writing_html_from_md(md_path: Path):
     """Convert a writing markdown file into a full HTML article using template."""
-    with open(md_path, "r", encoding="utf-8") as f:
-        text = f.read()
+    meta, body = read_entry(md_path)
 
-    meta, body = parse_front_matter(text)
-
-    title = meta.get("title", md_path.stem)
-    dt = coerce_date(meta.get("date"))
-    if dt is None:
-        raise ValueError(f"{md_path.name} missing required front matter field: date")
+    title = get_title(meta, md_path)
+    dt = required_date(meta, "date")
     date_str = format_date(dt)
-    tags = meta.get("tags", [])
+    tags = get_tags(meta)
 
     html_content = add_image_captions(process_video_embeds(MARKDOWN_EXT.convert(body)))
+    MARKDOWN_EXT.reset()
 
     with open(ARTICLE_TEMPLATE_FILE, "r", encoding="utf-8") as temp:
         template = temp.read()
@@ -220,36 +344,24 @@ def build_writing_entry(entry: dict):
     with open(ENTRY_TEMPLATE_FILE, "r", encoding="utf-8") as f:
         tpl = f.read()
 
-    tag_str = ""
-    for tag in entry["tags"]:
-        if isinstance(tag, dict):
-            text = tag.get("text", "")
-            href = tag.get("href", "#")
-            tag_str += f'<a href="{href}" target="_blank">{text}</a>\n'
-        else:
-            tag_str += f'<a href="#">{tag}</a>\n'
-
     return (
         tpl.replace("{{date}}", entry["date_str"])
         .replace("{{link}}", entry["filename"])
         .replace("{{title}}", entry["title"])
-        .replace("{{tags}}", tag_str)
+        .replace("{{tags}}", render_tag_links(entry["tags"]))
     )
 
 
 def build_writing():
     WRITING_HTML_DIR.mkdir(parents=True, exist_ok=True)
-    entries = []
-
-    for md_file in sorted(WRITING_MD_DIR.glob("*.md")):
-        info = build_writing_html_from_md(md_file)
-        entries.append(info)
+    entries = build_all(WRITING_MD_DIR, build_writing_html_from_md)
 
     # newest → oldest by date
     entries = sorted(entries, key=lambda x: x["date_dt"], reverse=True)
 
     entry_blocks = [build_writing_entry(e) for e in entries]
     update_index(WRITING_FILE, entry_blocks)
+    return len(entries)
 
 
 # -------------------------------------------------------
@@ -260,26 +372,21 @@ def build_curation_html_from_md(md_path: Path):
     Convert a curation markdown file into a full HTML page.
     Uses the same article_template.html, but injects an image row + date range.
     """
-    with open(md_path, "r", encoding="utf-8") as f:
-        text = f.read()
+    meta, body = read_entry(md_path)
 
-    meta, body = parse_front_matter(text)
+    title = get_title(meta, md_path)
 
-    title = meta.get("title", md_path.stem)
-
-    start_dt = coerce_date(meta.get("start-date"))
-    if start_dt is None:
-        raise ValueError(f"{md_path.name} missing required front matter field: start-date")
-    end_dt = coerce_date(meta.get("end-date"))  # optional
+    start_dt = required_date(meta, "start-date")
+    end_dt = coerce_date(meta.get("end-date"), "end-date")  # optional
 
     start_str = format_date(start_dt)
     end_str = format_date(end_dt) if end_dt else ""
 
-    tags = meta.get("tags", [])
+    tags = get_tags(meta)
 
-    img_l = meta.get("image-left", "")
-    img_m = meta.get("image-middle", "")
-    img_r = meta.get("image-right", "")
+    img_l = asset_url(meta.get("image-left"))
+    img_m = asset_url(meta.get("image-middle"))
+    img_r = asset_url(meta.get("image-right"))
 
     # Build a small header block for the curation detail page
     date_line = start_str if not end_str else f"{start_str} — {end_str}"
@@ -291,7 +398,7 @@ def build_curation_html_from_md(md_path: Path):
 """.strip()
 
     html_content = images_html + "\n" + add_image_captions(process_video_embeds(MARKDOWN_EXT.convert(body)))
-
+    MARKDOWN_EXT.reset()
 
     with open(ARTICLE_TEMPLATE_FILE, "r", encoding="utf-8") as temp:
         template = temp.read()
@@ -317,9 +424,9 @@ def build_curation_html_from_md(md_path: Path):
         "start_str": start_str,
         "end_str": end_str,
         "tags": tags,
-        "img_l": (img_l or "").strip(),
-        "img_m": (img_m or "").strip(),
-        "img_r": (img_r or "").strip(),
+        "img_l": img_l,
+        "img_m": img_m,
+        "img_r": img_r,
         "filename": f"{CURATION_LINK_PREFIX}/{filename}",
     }
 
@@ -333,9 +440,9 @@ def build_curation_entry(entry: dict):
     bottom_date = entry["end_str"] if entry["end_str"] else entry["start_str"]
     tags_html = render_tag_links(entry["tags"])
 
-    img_l = f'<img src="{entry["img_l"]}" alt="" loading="lazy" />' if entry["img_l"] else '<div class="curation-img placeholder"></div>'
-    img_m = f'<img src="{entry["img_m"]}" alt="" loading="lazy" />' if entry["img_m"] else '<div class="curation-img placeholder"></div>'
-    img_r = f'<img src="{entry["img_r"]}" alt="" loading="lazy" />' if entry["img_r"] else '<div class="curation-img placeholder"></div>'
+    img_l = safe_img(entry["img_l"])
+    img_m = safe_img(entry["img_m"])
+    img_r = safe_img(entry["img_r"])
 
     return f"""
 <div class="curation-entry">
@@ -366,17 +473,14 @@ def build_curation_entry(entry: dict):
 
 def build_curation():
     CURATION_HTML_DIR.mkdir(parents=True, exist_ok=True)
-    entries = []
-
-    for md_file in sorted(CURATION_MD_DIR.glob("*.md")):
-        info = build_curation_html_from_md(md_file)
-        entries.append(info)
+    entries = build_all(CURATION_MD_DIR, build_curation_html_from_md)
 
     # newest → oldest by start-date
     entries = sorted(entries, key=lambda x: x["start_dt"], reverse=True)
 
     entry_blocks = [build_curation_entry(e) for e in entries]
     update_index(CURATION_FILE, entry_blocks)
+    return len(entries)
 
 
 # -------------------------------------------------------
@@ -389,9 +493,17 @@ def main():
         optimize_images.main()
     except ImportError:
         print("Skipping image optimizer (scripts/optimize_images.py not found).")
-    build_writing()
-    build_curation()
-    print("Build complete.")
+    except Exception as e:  # a photo problem should never stop the site from publishing
+        print(f"WARNING: image optimizer failed ({type(e).__name__}: {e}); continuing.")
+    n_writing = build_writing()
+    n_curation = build_curation()
+    print(f"Build complete: {n_writing} writing entries, {n_curation} curation entries.")
+    if SKIPPED:
+        print(f"{len(SKIPPED)} entr{'y was' if len(SKIPPED) == 1 else 'ies were'} skipped:")
+        for rel, message in SKIPPED:
+            print(f"  - {rel}: {message}")
+        if "--strict" in sys.argv:
+            sys.exit(1)
 
 
 if __name__ == "__main__":

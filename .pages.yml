@@ -1,0 +1,104 @@
+# Pages CMS configuration (https://pagescms.org)
+# This file controls the forms Mario sees at app.pagescms.org.
+# The entries it saves are the same markdown files scripts/build.py reads.
+
+media:
+  input: assets/images/uploads      # where uploaded photos are saved in the repo
+  output: /assets/images/uploads    # the web address written into the entry
+  rename: random                    # unique names, so a new "image1.jpg" can't replace an old one
+  extensions: [jpg, jpeg, png, webp, gif, heic]
+
+content:
+  # ---------------------------------------------------------------- Writing
+  - name: articles
+    label: Writing
+    type: collection
+    path: assets/articles/markdown
+    format: yaml-frontmatter
+    filename: "{year}-{month}-{day}-{primary}.md"
+    view:
+      primary: title
+      sort: date
+      order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: date
+        label: Date published
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: tags
+        label: Links shown under the title
+        description: "Each one shows a name that links to a website (for example the publication or the artist)."
+        type: object
+        list: true
+        fields:
+          - name: text
+            label: Name to show
+            type: string
+          - name: href
+            label: Web address (starting with https://)
+            type: string
+      - name: body
+        label: Article
+        description: "Use the picture button in the toolbar to add photos. The caption is the text shown under each photo."
+        type: rich-text
+
+  # --------------------------------------------------------------- Curation
+  - name: curation
+    label: Curation
+    type: collection
+    path: assets/curation/markdown
+    format: yaml-frontmatter
+    filename: "{year}-{month}-{day}-{primary}.md"
+    view:
+      primary: title
+      sort: start-date
+      order: desc
+    fields:
+      - name: title
+        label: Exhibition title
+        type: string
+        required: true
+      - name: start-date
+        label: Opening date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: end-date
+        label: Closing date (optional)
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: image-left
+        label: Preview photo 1 (left)
+        description: "The three preview photos are shown on the Curation page."
+        type: image
+      - name: image-middle
+        label: Preview photo 2 (middle)
+        type: image
+      - name: image-right
+        label: Preview photo 3 (right)
+        type: image
+      - name: tags
+        label: Links shown under the title
+        description: "Each one shows a name that links to a website (for example the gallery or the artist)."
+        type: object
+        list: true
+        fields:
+          - name: text
+            label: Name to show
+            type: string
+          - name: href
+            label: Web address (starting with https://)
+            type: string
+      - name: body
+        label: Text
+        description: "Use the picture button in the toolbar to add photos."
+        type: rich-text
